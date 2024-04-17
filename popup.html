@@ -1,18 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Audio Recorder Extension</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <div class="container">
-    <h1>Audio Recorder</h1>
-    <button id="startRecordingButton" class="recordButton">Start Recording</button>
-    <button id="stopRecordingButton" class="recordButton">Stop Recording</button>
-  </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Audio Recorder Extension</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Запишите свою речь</h1>
+      <div id="result"></div>
 
-  <script src="popup.js"></script>
-</body>
+      <div class="btn_container">
+        <button id="startRecordingButton" class="recordButton">
+          <img width="100" src="./icon.png" alt="record" />
+        </button>
+        <button id="stopRecordingButton" class="recordButton">
+          <img width="100" src="./rocording.png" alt="record" />
+        </button>
+      </div>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
 </html>

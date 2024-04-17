@@ -1,84 +1,80 @@
-async function stt(audioBlob) {
-  const bearerToken =
-    "e4b038f10b807136fe0c6dfa339a1bd576eca77dfc9cd2ee88a4a289c00e387688ae8b49055300bed5ffb735d18594772784c2e66840bb794c24fdf77ebac3d9";
+function stt(audioBlob) {
+  // Create a FormData object and append the audioBlob to it
   const formData = new FormData();
-  formData.append("audio", audioBlob);
-  try {
-    const resp = await fetch("https://asr.ulut.kg/api/receive_data", {
-      method: "POST",
-      body: formData,
-      headers: {
-        Authorization: `Bearer ${bearerToken}`,
-      },
+  formData.append("audio", audioBlob, "audio.ogg"); // Use audioFile as the field name
+
+  // Send the FormData object with the audioBlob in the request body
+  fetch("http://192.168.54.19:8000/stt/", {
+    method: "POST",
+    body: formData,
+  })
+    .then(async (res) => {
+      try {
+        if (!res.ok) {
+          throw new Error("Failed to receive data from API");
+        }
+        const text = await res.json();
+        document.getElementById("result").innerText = text['text']
+        console.log(text['text']);
+      } catch {
+        console.log("huita"); 
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
     });
-
-    if (!resp.ok) {
-      throw new Error(`HTTP error! Status: ${resp.status}`);
-    }
-
-    const data = await resp.json(); // Extract JSON response data
-    console.log(data); // Log the response data
-
-    console.log({
-      headers: {
-        Authorization: "Bearer " + bearerToken,
-      },
-    });
-  } catch (error) {
-    console.error("Error:", error); // Log the actual error
-  }
 }
 
+const startBtn = document.getElementById("startRecordingButton");
+const stopBtn = document.getElementById("stopRecordingButton");
 navigator.mediaDevices
   .getUserMedia({ audio: true })
   .then(function (stream) {
-    // Create a MediaRecorder instance
     const mediaRecorder = new MediaRecorder(stream);
     const audioChunks = [];
 
-    // Start recording when the user clicks a button
-    document
-      .getElementById("startRecordingButton")
-      .addEventListener("click", function () {
-        mediaRecorder.start();
-        console.log("Recording started.");
-      });
+    startBtn.addEventListener("click", function () {
+      mediaRecorder.start();
+      startBtn.style.display = "none";
+      stopBtn.style.display = "block";
+      console.log("Recording started.");
+    });
 
-    // Stop recording when the user clicks a button
-    document
-      .getElementById("stopRecordingButton")
-      .addEventListener("click", function () {
-        mediaRecorder.stop();
-        console.log("Recording stopped.");
-      });
+    stopBtn.addEventListener("click", function () {
+      mediaRecorder.stop();
+      startBtn.style.display = "block";
+      stopBtn.style.display = "none";
+      console.log("Recording stopped.");
+    });
 
-    // Save the recorded audio when the MediaRecorder has data available
     mediaRecorder.ondataavailable = function (event) {
       audioChunks.push(event.data);
     };
 
-    // When recording is stopped, create a new Blob and play the recorded audio
     mediaRecorder.onstop = function () {
-      const audioBlob = new Blob(audioChunks, { type: "audio/ogg; codecs=opus" });
+      // Create a Blob object from the collected audio chunks
+      const audioBlob = new Blob(audioChunks, {
+        type: "audio/ogg", // Use audio/ogg for .ogg files
+      });
       const audioURL = URL.createObjectURL(audioBlob);
       const audio = new Audio(audioURL);
       audio.controls = true;
-      document.body.appendChild(audio);
-
-      // Pass the audioBlob to the STT function
+      document.querySelector(".btn_container").appendChild(audio);
+      audio.className = "audio"
+      // Pass the audioBlob to the stt function for further processing
       stt(audioBlob);
+
+      // Clear audioChunks for next recording
+      audioChunks.length = 0;
     };
   })
   .catch(function (err) {
     if (err.name === "NotAllowedError") {
-      // Handle permission denied error
       console.log(
         "User denied microphone access. Please grant permission to record audio."
       );
-      // Display a message to the user informing them about the permission issue
-      // Provide an option for the user to retry accessing the microphone
+      // You might want to display a user-friendly message or UI element here
     } else {
-      // Handle other errors
-      console.log("The following getUserMedia error occurred: " + err);
+      console.error("The following getUserMedia error occurred:", err);
     }
   });
