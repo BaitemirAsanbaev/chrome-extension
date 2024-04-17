@@ -14,10 +14,10 @@ function stt(audioBlob) {
           throw new Error("Failed to receive data from API");
         }
         const text = await res.json();
-        document.getElementById("result").innerText = text['text']
-        console.log(text['text']);
+        document.getElementById("result").innerText = text["text"];
+        console.log(text["text"]);
       } catch {
-        console.log("huita"); 
+        console.log("huita");
       }
     })
     .catch((error) => {
@@ -59,8 +59,12 @@ navigator.mediaDevices
       const audioURL = URL.createObjectURL(audioBlob);
       const audio = new Audio(audioURL);
       audio.controls = true;
+      const existingAudio = document.querySelector(".audio");
+      if (existingAudio) {
+        existingAudio.parentNode.removeChild(existingAudio);
+      }
       document.querySelector(".btn_container").appendChild(audio);
-      audio.className = "audio"
+      audio.className = "audio";
       // Pass the audioBlob to the stt function for further processing
       stt(audioBlob);
 
